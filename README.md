@@ -12,8 +12,8 @@ https://github.com/cloudsteak/trn-azure-commandline
 ### 1. Erőforrás típusonként
 
 ```bash
-az group create -n app-vms -l north-europe
-az group create -n app-network -l north-europe
-az group create -n app-storage -l north-europe
+az group create -n app-vms -l northeurope --tags domain=app os=linux type=vm;
+az group create -n app-network -l northeurope --tags domain=app os=linux type=network;
+az group create -n app-storage -l northeurope --tags domain=app os=linux type=storage;
 ```
 

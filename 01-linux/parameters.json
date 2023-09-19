@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+            "value": null
+        },
+        "networkInterfaceName": {
+            "value": "sablomvm447"
+        },
+        "networkSecurityGroupName": {
+            "value": "sablomvm-nsg"
+        },
+        "publicIpAddressName": {
+            "value": "sablomvm-ip"
+        },
+        "virtualMachineName": {
+            "value": "sablomvm"
+        },
+        "virtualMachineComputerName": {
+            "value": "sablomvm"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_B1ls"
+        },
+        "adminUsername": {
+            "value": "rendszergazda"
+        },
+        "adminPassword": {
+            "value": null
+        }
+    }
+}
