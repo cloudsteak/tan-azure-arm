@@ -63,36 +63,34 @@
                 "count": "[variables('number')]",
                 "mode": "Parallel"
             },
-            {
-                "name": "[concat(parameters('prefix'), 'nic', copyIndex())]",
-                "type": "Microsoft.Network/networkInterfaces",
-                "apiVersion": "2022-11-01",
-                "location": "[variables('location')]",
-                "dependsOn": [
-                    "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                    "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
-                ],
-                "properties": {
-                    "ipConfigurations": [
-                        {
-                            "name": "ipconfig1",
-                            "properties": {
-                                "subnet": {
-                                    "id": "[variables('subnetRef')]"
-                                },
-                                "privateIPAllocationMethod": "Dynamic",
-                                "publicIpAddress": {
-                                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]",
-                                    "properties": {
-                                        "deleteOption": "Delete"
-                                    }
+            "name": "[concat(parameters('prefix'), 'nic', copyIndex())]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2022-11-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]",
+                                "properties": {
+                                    "deleteOption": "Delete"
                                 }
                             }
                         }
-                    ],
-                    "networkSecurityGroup": {
-                        "id": "[variables('nsgId')]"
                     }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
                 }
             }
         },
