@@ -3,22 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "prefix": {
-            "value": null
+            "value": "app"
         },
-        "networkInterfaceName": {
-            "value": "sablomvm447"
-        },
-        "networkSecurityGroupName": {
-            "value": "sablomvm-nsg"
-        },
-        "publicIpAddressName": {
-            "value": "sablomvm-ip"
-        },
-        "virtualMachineName": {
-            "value": "sablomvm"
-        },
-        "virtualMachineComputerName": {
-            "value": "sablomvm"
+        "number": {
+            "value": 2
         },
         "virtualMachineSize": {
             "value": "Standard_B1ls"

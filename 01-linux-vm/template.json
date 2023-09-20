@@ -4,7 +4,9 @@
     "parameters": {
         "prefix": {
             "type": "string",
-            "defaultValue": "app-1"
+            "metadata": {
+                "description": "Prefix"
+            }
         },
         "number": {
             "type": "int",
@@ -14,22 +16,10 @@
                 3,
                 4,
                 5
-            ]
-        },
-        "networkInterfaceName": {
-            "type": "string"
-        },
-        "networkSecurityGroupName": {
-            "type": "string"
-        },
-        "publicIpAddressName": {
-            "type": "string"
-        },
-        "virtualMachineName": {
-            "type": "string"
-        },
-        "virtualMachineComputerName": {
-            "type": "string"
+            ],
+            "metadata": {
+                "description": "Mennyi viruálisgépet hozzunk létre"
+            }
         },
         "virtualMachineSize": {
             "allowedValues": [
@@ -48,10 +38,6 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "vmResourceGroup": "app-vms",
-        "networkResourceGroup": "app-network",
-        "storageResourceGroup": "app-storage",
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('prefix'), '-nsg')]",
         "vnetId": "/subscriptions/3a1ff985-e6aa-44a8-ad61-a6827fa6f92a/resourceGroups/mentorklub2023/providers/Microsoft.Network/virtualNetworks/mentor-net",
         "vnetName": "[last(split(variables('vnetId'), '/'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', 'frontend')]"
@@ -59,17 +45,20 @@
     "resources": [
         {
             "copy": {
-                "name": "nic",
-                "count": "[variables('number')]",
-                "mode": "Parallel"
+                "name": "nicCopy",
+                "count": "[parameters('number')]"
             },
-            "name": "[concat(parameters('prefix'), 'nic', copyIndex())]",
+            "name": "[concat(parameters('prefix'), '-nic-', copyIndex())]",
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2022-11-01",
             "location": "[variables('location')]",
+            "tags": {
+                "Component": "NIC",
+                "VM": "[concat(parameters('prefix'), '-vm-', copyIndex())]"
+            },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', concat(parameters('prefix'), '-nsg'))]",
+                "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('prefix'), '-pip-', copyIndex()))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -81,7 +70,7 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]",
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', concat(parameters('prefix'), '-pip-', copyIndex()))]",
                                 "properties": {
                                     "deleteOption": "Delete"
                                 }
@@ -90,12 +79,15 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
+                    "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', concat(parameters('prefix'), '-nsg'))]"
                 }
             }
         },
         {
-            "name": "[parameters('networkSecurityGroupName')]",
+            "name": "[concat(parameters('prefix'), '-nsg')]",
+            "tags": {
+                "Component": "NSG"
+            },
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2019-02-01",
             "location": "[variables('location')]",
@@ -131,9 +123,17 @@
             }
         },
         {
-            "name": "[parameters('publicIpAddressName')]",
+            "name": "[concat(parameters('prefix'), '-pip-', copyIndex())]",
+            "tags": {
+                "Component": "PublicIP",
+                "VM": "[concat(parameters('prefix'), '-vm-', copyIndex())]"
+            },
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2020-08-01",
+            "copy": {
+                "name": "pipCopy",
+                "count": "[parameters('number')]"
+            },
             "location": "[variables('location')]",
             "properties": {
                 "publicIpAllocationMethod": "Static"
@@ -143,12 +143,20 @@
             }
         },
         {
-            "name": "[parameters('virtualMachineName')]",
+            "name": "[concat(parameters('prefix'), '-vm-', copyIndex())]",
+            "tags": {
+                "Component": "VM",
+                "VM": "[concat(parameters('prefix'), '-vm-', copyIndex())]"
+            },
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2022-03-01",
+            "copy": {
+                "name": "vmCopy",
+                "count": "[parameters('number')]"
+            },
             "location": "[variables('location')]",
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('prefix'), '-nic-', copyIndex())]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -161,7 +169,8 @@
                             "storageAccountType": "Standard_LRS"
                         },
                         "diskSizeGB": 30,
-                        "deleteOption": "Delete"
+                        "deleteOption": "Delete",
+                        "name": "[concat(parameters('prefix'), '-vm-', copyIndex(),'-OsDisk')]"
                     },
                     "imageReference": {
                         "publisher": "canonical",
@@ -173,7 +182,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('prefix'), '-nic-', copyIndex()))]",
                             "properties": {
                                 "deleteOption": "Detach"
                             }
@@ -181,7 +190,7 @@
                     ]
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtualMachineComputerName')]",
+                    "computerName": "[concat(parameters('prefix'), '-vm-', copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {

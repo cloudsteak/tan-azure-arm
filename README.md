@@ -7,13 +7,16 @@ https://github.com/cloudsteak/trn-azure-commandline
 
 
 
-## Erőforráscsoportok létrehozása
+## 1. Virtuálisgép létrehozása ARM sablonból
 
-### 1. Erőforrás típusonként
+### Erőforráscsoport
 
 ```bash
-az group create -n app-vms -l northeurope --tags domain=app os=linux type=vm;
-az group create -n app-network -l northeurope --tags domain=app os=linux type=network;
-az group create -n app-storage -l northeurope --tags domain=app os=linux type=storage;
+az group create -n app-vms -l northeurope --tags Component=VM OS=Linux;
 ```
 
+### Üzembehelyezés
+
+```bash
+az deployment group create --resource-group app-vms --template-file 01-linux-vm/template.json
+```
