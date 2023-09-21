@@ -25,7 +25,7 @@ az group create -n app-vms -l northeurope --tags Component=Group OS=Linux
 - PowerShell
 
 ```PowerShell
-New-AzResourceGroupDeployment -ResourceGroupName app-vms -Name LinixVM -TemplateFile ./01-linux-vm/template.json
+New-AzResourceGroupDeployment -ResourceGroupName app-vms -Name LinuxVM -TemplateFile ./01-linux-vm/template.json
 ```
 
 - Azure-Cli
